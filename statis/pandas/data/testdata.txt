@@ -1,0 +1,4 @@
+studend id age score
+zhagnsan 1001 25 12
+lisi 2001 54 45
+lishi 1003 52 25
