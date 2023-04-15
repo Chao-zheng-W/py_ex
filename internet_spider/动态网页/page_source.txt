@@ -1,0 +1,909 @@
+<html lang="zh-CN"><head>
+  <meta charset="utf-8">
+  <meta name="”renderer”" content="”webkit”">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>人民邮电出版社</title>
+  
+
+<link rel="shortcut icon" href="/static/eleBusiness/img/favicon.ico" charset="UTF-8">
+<link rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="/static/portal/css/iconfont.css">
+<link rel="stylesheet" href="/static/portal/tools/iconfont.css">
+<link rel="stylesheet" href="/static/portal/css/font.css">
+<link rel="stylesheet" href="/static/interface/css/sitefont.css">
+<link rel="stylesheet" href="/static/interface/css/common.css">
+<link rel="stylesheet" href="/static/interface/css/bar.css">
+<link rel="stylesheet" href="/static/interface/css/header.css">
+<link rel="stylesheet" href="/static/interface/css/footer.css">
+
+<script type="text/javascript" async="" src="https://dn-growing.qbox.me/vds.js"></script><script type="text/javascript" src="/static/portal/js/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="/static/dist/js/vue.js"></script>
+
+<script type="text/javascript">
+    var _vds = _vds || [];
+    window._vds = _vds;
+    (function(){
+        _vds.push(['setAccountId', '9311c428042bb76e']);
+        (function() {
+            var vds = document.createElement('script');
+            vds.type='text/javascript';
+            vds.async = true;
+            vds.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'dn-growing.qbox.me/vds.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(vds, s);
+        })();
+    })();
+</script>
+
+  <link rel="stylesheet" href="/static/portal/css/swiper-3.4.1.min.css">
+  <script type="text/javascript" src="/static/portal/js/swiper-3.4.1.jquery.min.js"></script>
+  <link rel="stylesheet" href="/static/interface/css/index.css">
+</head>
+<body>
+<!-- header -->
+
+
+
+<div id="header"><div class="container"><div class="row header"><div class="col-md-4"><a href="/" class="logo"><img src="/static/interface/img/logo.png" alt="人民邮电出版社有限公司"></a></div> <div class="col-md-8 tools"><div class="jump"><a href="/login" target="_blank">登录</a> |
+          <a href="/reg">注册</a> <!----></div> <div class="jump" style="display: inline-flex; align-items: center; margin: 0px 10px;"><input type="checkbox" style="margin-top: -2px;"> <span style="font-size: 15px; line-height: 1; margin-left: 5px;">教材</span></div> <div class="search"><input type="text" placeholder="书名、作者、书号、关键词"> <button type="button">搜索</button></div> <a href="/en"><button type="button" class="btn btn-default btn-lg" style="font-weight: bold; padding: 8px 16px;">EN</button></a></div></div></div> <div class="container-fluid navigator"><div class="row"><div class="container nav-box"><div class="row"><a href="javascript:;" class="active item">首页</a><a href="javascript:;" class="item">工作动态</a><a href="javascript:;" class="item">企业党建</a><a href="javascript:;" class="item">图书</a><a href="javascript:;" class="item">期刊</a><a href="javascript:;" class="item">服务</a><a href="javascript:;" class="item">招贤纳士</a><a href="javascript:;" class="item">关于我们</a></div></div></div></div></div>
+
+<script>
+  let header = new Vue({
+    el: '#header',
+    data: {
+        keyword: '',
+        jc: '',
+        userName: '',
+        cartNum: 0,
+        navList: [],
+        thisUrl: window.location.pathname
+    },
+    mounted: function() {
+      if ('' === '1')
+        this.toService()
+      this.getUserInfo()
+      this.getNavigator()
+    },
+    methods: {
+      /**
+       * 滚动到服务
+       **/
+      toService: function() {
+        setTimeout(function () {
+          let _top = $('#service').offset().top - 50;
+          $('body,html').animate({
+            scrollTop: _top + 'px'
+          }, 500);
+        }, 500);
+      },
+      
+      getUserInfo: function() {
+        let $this = this
+        $.ajax({
+          url: '/login/getUserName',
+          success: function (res) {
+            if (res.success) {
+              $this.userName = res.data
+              $this.getCartNum()
+            }
+          }
+        });
+      },
+      
+      toSearch: function() {
+        let $this = this
+          if(!!window.ActiveXObject || "ActiveXObject" in window){
+              window.location.href='/search?keyword=' + encodeURIComponent($this.keyword)+'&jc='+$this.jc;
+          } else {
+              window.open('/search?keyword=' + $this.keyword+'&jc='+$this.jc);
+          }
+       // window.open('/search?keyword=' + $this.keyword)
+      },
+      
+      getCartNum: function() {
+        let $this = this
+        if ($this.userName) {
+          $.ajax({
+            type: 'POST',
+            url: '/shopCart/getShopCartList',
+            dataType: 'json',
+            async: false,
+            success: function (res) {
+              $this.items = res.data;
+              let carSums = 0;
+              $.each($this.items, function (index, item) {
+                carSums += item.quantity;
+              });
+              $this.cartNum = carSums;
+            },
+            error: function (msg) {
+              console.log(msg);
+            }
+          });
+        }
+      },
+      
+      getNavigator: function() {
+        let $this = this
+        $.ajax({
+          url: '/headNav/getHeadNavForGrid',
+          success: function (res) {
+            if (res.success) {
+              $this.navList = res.data
+            }
+          }
+        });
+      },
+      
+      navClick: function(data) {
+        let $this = this
+        let url = data.urlType === 2 ? data.sectionUrl : '' + data.sectionUrl
+        let target = data.sectionUrl.indexOf('http') >= 0
+        if (data.sectionUrl === '#sevice') {
+          if ($this.thisUrl !== '/') window.location.href = '/?path=1'
+          else $this.toService()
+        } else if (target)
+          window.open(url)
+        else window.location.href = url
+      }
+    }
+  })
+</script>
+
+<div class="container">
+  <!-- 轮播 -->
+  <div class="row">
+    
+
+<div class="banner">
+    <div class="swiper-container slide_box swiper-container-horizontal">
+        <div class="swiper-wrapper" id="banner_slide" style="transform: translate3d(-7200px, 0px, 0px); transition-duration: 1000ms;"><div class="swiper-slide swiper-slide-duplicate swiper-slide-duplicate-next" data-swiper-slide-index="6" style="width: 1200px;"><a href="/p/news/1681475146432.html" target="_blank"><img src="/upload//2023/04/9f1a2d63122a42b7a2b2588a935b18f4.jpg" alt="6"><p>4．15全民国家安全教育日 ｜ 维护国家安全 人人有责</p></a></div><div class="swiper-slide" data-swiper-slide-index="0" style="width: 1200px;"><a href="https://www.ptpress.com.cn/special/detail?id=d359b5e0-5e69-401e-a897-43624b38c258" target="_blank"><img src="/upload//2022/10/e4125288a57d4b4cb3e792424df31044.jpg" alt="0"><p>学习贯彻党的二十大精神</p></a></div><div class="swiper-slide" data-swiper-slide-index="1" style="width: 1200px;"><a href="/p/news/1631170124388.html" target="_blank"><img src="/upload//2021/09/b45a4219a9394be69c00e8bbcc0bd451.jpg" alt="1"><p>习近平：把握新发展阶段，贯彻新发展理念，构建新发展格局</p></a></div><div class="swiper-slide" data-swiper-slide-index="2" style="width: 1200px;"><a href="https://www.ptpress.com.cn/" target="_blank"><img src="/upload//2023/02/42754298ed3041f896a318d0317a03f3.jpg" alt="2"><p>人民邮电出版社成立七十周年</p></a></div><div class="swiper-slide" data-swiper-slide-index="3" style="width: 1200px;"><a href="https://www.ptpress.com.cn/bookSpecial?id=7470387e-feed-4c96-8add-d0546ceb8402" target="_blank"><img src="/upload//2022/10/943eb603916f46cc8ca4f6860aee8c07.jpg" alt="3"><p>回眸“十三五”</p></a></div><div class="swiper-slide swiper-slide-prev" data-swiper-slide-index="4" style="width: 1200px;"><a href="https://www.ptpress.com.cn/bookSpecial?id=d7ef4290-f354-4a9c-9eab-fdfc1a165d47" target="_blank"><img src="/upload//2022/10/5de996e9b3fd412fa4ebe08baa5f20cd.jpg" alt="4"><p>展望“十四五”</p></a></div><div class="swiper-slide swiper-slide-active" data-swiper-slide-index="5" style="width: 1200px;"><a href="https://www.ptpress.com.cn/bookSpecial?id=1b4e3ee0-ec4f-4146-980f-a67c8799275c" target="_blank"><img src="/upload//2023/02/3af9be3cd22845f3a096a65d4e8cee8e.jpg" alt="5"><p>铸华章 礼赞新时代</p></a></div><div class="swiper-slide swiper-slide-next" data-swiper-slide-index="6" style="width: 1200px;"><a href="/p/news/1681475146432.html" target="_blank"><img src="/upload//2023/04/9f1a2d63122a42b7a2b2588a935b18f4.jpg" alt="6"><p>4．15全民国家安全教育日 ｜ 维护国家安全 人人有责</p></a></div><div class="swiper-slide swiper-slide-duplicate" data-swiper-slide-index="0" style="width: 1200px;"><a href="https://www.ptpress.com.cn/special/detail?id=d359b5e0-5e69-401e-a897-43624b38c258" target="_blank"><img src="/upload//2022/10/e4125288a57d4b4cb3e792424df31044.jpg" alt="0"><p>学习贯彻党的二十大精神</p></a></div></div>
+        <!-- 如果需要分页器 -->
+        <div class="swiper-pagination slide_page swiper-pagination-bullets"><span class="swiper-pagination-bullet"></span><span class="swiper-pagination-bullet"></span><span class="swiper-pagination-bullet"></span><span class="swiper-pagination-bullet"></span><span class="swiper-pagination-bullet"></span><span class="swiper-pagination-bullet swiper-pagination-bullet-active"></span><span class="swiper-pagination-bullet"></span></div>
+
+        <!-- 如果需要导航按钮 -->
+        <div class="swiper-button-prev slide_button slide_prev">
+            <i class="icon siteFont site-left"></i>
+        </div>
+        <div class="swiper-button-next slide_button slide_next">
+            <i class="icon siteFont site-right"></i>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $.ajax({
+            url: '/photos/getCarouselListForPortal',
+            dataType: 'json',
+            success: function (data) {
+                $.each(data.data, function (index, item) {
+                    var sectionUrl = '';
+                    if (item.urlType == 2) {
+                        sectionUrl = item.photoUrl;
+                    } else {
+                        var time = new Date();
+                        sectionUrl = '' + item.photoUrl;
+                    }
+                    var str = sectionUrl === "javascript:void(0);" ? '<div class="swiper-slide"><a href="' + sectionUrl +
+                        '"><img src="' + item.picPath + '" alt="' + index + '"></a><p>' +
+                        item.mainTitle + '</p></div>' :
+                        '<div class="swiper-slide"><a href="' + sectionUrl +
+                        '" target="_blank"><img src="' + item.picPath + '" alt="' + index + '"><p>' +
+                        item.mainTitle + '</p></a></div>';
+                    $('#banner_slide').append(str);
+                });
+                var mySwiper = new Swiper('.slide_box', {
+                    direction: 'horizontal',
+                    loop: true,
+                    autoplay: 3000,
+                    simulateTouch: false,
+                    speed: 1000,
+                    effect: 'slide',
+
+                    pagination: '.slide_page',
+
+                    nextButton: '.slide_next',
+                    prevButton: '.slide_prev'
+                });
+
+                $('.slide_page').on('mouseover', '.swiper-pagination-bullet', function () {
+                    var index = $(this).index();
+                    if (index + 1 !== mySwiper.activeIndex) {
+                        mySwiper.slideTo(index + 1, 500, false);//切换到第一个slide，速度为1秒
+                    }
+                });
+                $('.slide_box').hover(function () {
+                    mySwiper.stopAutoplay();
+                }, function () {
+                    mySwiper.startAutoplay();
+                });
+            }
+        });
+    });
+</script>
+
+  </div>
+
+  <div class="row line">
+      <div class="col-10">
+          <div class="col">
+      <!-- 时政要闻 -->
+          
+
+<style>
+    .news-list {
+        display: flex;
+    }
+    .news-list_item {
+        width: 50% !important;
+    }
+    .news-list_rigth {
+        padding: 0 10px;
+        margin-left: 20px;
+    }
+</style>
+<div class="news" id="currentAffairs">
+
+    <div class="title">
+        <i class="szyw"></i>
+        <span>时政要闻</span>
+        <a href="/ca" target="_blank">更多</a>
+    </div>
+
+    <div class="news-list">
+        
+
+        <div class="slide news-list_item">
+            
+            <div class="many">
+                <div class="swiper-container swiper-container-horizontal" id="currentAffairs-slide">
+                    <div class="swiper-wrapper" style="transform: translate3d(-570px, 0px, 0px); transition-duration: 0ms;"><div class="swiper-slide swiper-slide-duplicate swiper-slide-prev" data-swiper-slide-index="3" style="width: 560px;"><a href="/p/news/1681087212979.html" target="_blank"><img src="/upload/2023/04/a64297f75e2f4a618d920b2f8e6a3e2b.jpg"><p>习近平主持中央政治局第四次集体学习并发表重要讲话</p></a></div><div class="swiper-slide swiper-slide-active" data-swiper-slide-index="0" style="width: 560px;"><a href="/p/news/1681351654307.html" target="_blank"><img src="/upload/2023/04/781d411aa97c4e98b8cda26f2c772e6f.jpg"><p>习近平同法国总统马克龙举行会谈</p></a></div><div class="swiper-slide swiper-slide-next" data-swiper-slide-index="1" style="width: 560px;"><a href="/p/news/1681087903791.html" target="_blank"><img src="/upload/2023/04/f74f14f5baab4e94a903be7c435960a7.jpg"><p>习近平参加首都义务植树活动时强调：掀起造林绿化热潮 绘出美丽中国的更新画卷</p></a></div><div class="swiper-slide" data-swiper-slide-index="2" style="width: 560px;"><a href="/p/news/1681087684416.html" target="_blank"><img src="/upload/2023/04/daac7a87864c4a76811d5d6f5a685159.jpg"><p>学习贯彻习近平新时代中国特色社会主义思想主题教育工作会议在京召开 习近平发表重要讲话</p></a></div><div class="swiper-slide swiper-slide-duplicate-prev" data-swiper-slide-index="3" style="width: 560px;"><a href="/p/news/1681087212979.html" target="_blank"><img src="/upload/2023/04/a64297f75e2f4a618d920b2f8e6a3e2b.jpg"><p>习近平主持中央政治局第四次集体学习并发表重要讲话</p></a></div><div class="swiper-slide swiper-slide-duplicate swiper-slide-duplicate-active" data-swiper-slide-index="0" style="width: 560px;"><a href="/p/news/1681351654307.html" target="_blank"><img src="/upload/2023/04/781d411aa97c4e98b8cda26f2c772e6f.jpg"><p>习近平同法国总统马克龙举行会谈</p></a></div></div>
+                    <!-- 如果需要分页器 -->
+                    <div class="swiper-pagination news-page party-page swiper-pagination-clickable swiper-pagination-bullets"><span class="swiper-pagination-bullet swiper-pagination-bullet-active">1</span><span class="swiper-pagination-bullet">2</span><span class="swiper-pagination-bullet">3</span><span class="swiper-pagination-bullet">4</span></div>
+                </div>
+            </div>
+        </div>
+
+        
+
+        <ul class="news-list_item news-list_rigth"><li><a href="/p/news/1681351654307.html" target="_blank"><span class="name">习近平同法国总统马克龙举行会谈</span><span class="date">2023-04-06</span></a></li><li><a href="/p/news/1681087903791.html" target="_blank"><span class="name">习近平参加首都义务植树活动时强调：掀起造林绿化热潮 绘出美丽中国的更新画卷</span><span class="date">2023-04-04</span></a></li><li><a href="/p/news/1681087684416.html" target="_blank"><span class="name">学习贯彻习近平新时代中国特色社会主义思想主题教育工作会议在京召开 习近平发表重要讲话</span><span class="date">2023-04-03</span></a></li><li><a href="/p/news/1681087212979.html" target="_blank"><span class="name">习近平主持中央政治局第四次集体学习并发表重要讲话</span><span class="date">2023-03-31</span></a></li><li><a href="/p/news/1681087107463.html" target="_blank"><span class="name">中共中央政治局召开会议 中共中央总书记习近平主持</span><span class="date">2023-03-30</span></a></li><li><a href="/p/news/1679550301421.html" target="_blank"><span class="name">习近平同俄罗斯总统普京举行会谈</span><span class="date">2023-03-22</span></a></li><li><a href="/p/news/1679388772104.html" target="_blank"><span class="name">习近平出席中国共产党与世界政党高层对话会并发表主旨讲话</span><span class="date">2023-03-16</span></a></li><li><a href="/p/news/1678782697478.html" target="_blank"><span class="name">十四届全国人大一次会议在京闭幕 习近平发表重要讲话</span><span class="date">2023-03-13</span></a></li></ul>
+    </div>
+
+
+</div>
+
+<script>
+    //获取新闻列表
+    $.ajax({
+        url: '/newsInfo/getCurrentAffairsForPortal',
+        method: 'get',
+        dataType: 'json',
+        success: function (res) {
+            setCurrentAffairsTop(res.data.news4)
+            setCurrentAffairsList(res.data.news6)
+        }
+    })
+
+    //设置上边
+    function setCurrentAffairsTop(list) {
+        let ids = []
+        $.each(list, function (index, item) {
+            if (item.id) ids.push(item.id)
+        })
+        if (ids.length === 1) {
+            let data = null
+            $.each(list, function (index, item) {
+                if (item.id === ids[0])
+                    data = item
+            })
+            $('#currentAffairs .single').append('<a href="' + data.staticInfoUrl
+                + '" target="_blank"><img src="' + data.picPath
+                + '" alt="' + data.mainTitle + '"><p>' + data.mainTitle
+                + '</p></a>').show()
+            $('#currentAffairs .many').remove()
+        }
+        if (ids.length > 1) {
+            $('#currentAffairs .single').remove()
+            $('#currentAffairs .many').show()
+            $.each(list, function (index, item) {
+                if (item.id) {
+                    let str = '<div class="swiper-slide"><a href="' + item.staticInfoUrl
+                        + '" target="_blank"><img src="' + item.picPath
+                        + '"><p>' + item.mainTitle + '</p></a></div>'
+                    $('#currentAffairs .swiper-wrapper').append(str)
+                }
+            })
+            let trendSwiper = new Swiper('#currentAffairs-slide', {
+                direction: 'horizontal',
+                loop: true,
+                autoplay: false,
+                simulateTouch: false,
+                speed: 1000,
+                effect: 'slide',
+                pagination: '.party-page',
+                paginationClickable: true,
+                paginationBulletRender: function (swiper, index, className) {
+                    return '<span class="' + className + '">' + (index + 1) + '</span>';
+                }
+            });
+        }
+    }
+
+    //设置列表
+    function setCurrentAffairsList(list) {
+        if (list.length) {
+            $.each(list, function (index, item) {
+                let str = '<li><a href="' + item.staticInfoUrl
+                    + '" target="_blank"><span class="name">' + item.mainTitle
+                    + '</span><span class="date">' + item.newsDate.split('+')[0]
+                    + '</span></a></li>'
+                $('#currentAffairs ul').append(str)
+            })
+        }
+    }
+</script>
+          </div>
+      </div>
+  </div>
+
+
+
+  <div class="row line">
+    <div class="col-5">
+      <div class="col">
+        <!-- 企业党建 -->
+          
+
+<div class="news" id="party">
+  <div class="title">
+    <i class="party"></i>
+    <span>企业党建</span>
+    <a href="/party" target="_blank">更多</a>
+  </div>
+  <div class="slide">
+    
+    <div class="many">
+      <div class="swiper-container swiper-container-horizontal" id="party-slide">
+        <div class="swiper-wrapper" style="transform: translate3d(-550px, 0px, 0px); transition-duration: 0ms;"><div class="swiper-slide swiper-slide-duplicate swiper-slide-prev" data-swiper-slide-index="3" style="width: 550px;"><a href="/p/news/1625093371453.html" target="_blank"><img src="/upload/2021/07/e39e80a384c84b5a9023fa1517efdbc8.jpg"><p>人民邮电出版社有限公司召开庆祝中国共产党成立100周年党员大会</p></a></div><div class="swiper-slide swiper-slide-active" data-swiper-slide-index="0" style="width: 550px;"><a href="/p/news/1660700640769.html" target="_blank"><img src="/upload/2022/08/5e3383573417474f9d07eeba4c953ada.jpg"><p>人民邮电出版社有限公司党委召开2022年第三季度理论学习中心组（扩大）集体学习</p></a></div><div class="swiper-slide swiper-slide-next" data-swiper-slide-index="1" style="width: 550px;"><a href="/p/news/1634173215096.html" target="_blank"><img src="/upload/2021/10/2ec3e38a2ca04b22a76ab2c2e255c7d9.jpg"><p>喜迎国庆 我社再次掀起党史学习热潮</p></a></div><div class="swiper-slide" data-swiper-slide-index="2" style="width: 550px;"><a href="/p/news/1634202858343.html" target="_blank"><img src="/upload/2021/10/e4e8198a1686411e9827c27b85418a4c.jpg"><p>人民邮电出版社有限公司召开2021年第三季度党委理论学习中心组（扩大）学习会</p></a></div><div class="swiper-slide swiper-slide-duplicate-prev" data-swiper-slide-index="3" style="width: 550px;"><a href="/p/news/1625093371453.html" target="_blank"><img src="/upload/2021/07/e39e80a384c84b5a9023fa1517efdbc8.jpg"><p>人民邮电出版社有限公司召开庆祝中国共产党成立100周年党员大会</p></a></div><div class="swiper-slide swiper-slide-duplicate swiper-slide-duplicate-active" data-swiper-slide-index="0" style="width: 550px;"><a href="/p/news/1660700640769.html" target="_blank"><img src="/upload/2022/08/5e3383573417474f9d07eeba4c953ada.jpg"><p>人民邮电出版社有限公司党委召开2022年第三季度理论学习中心组（扩大）集体学习</p></a></div></div>
+        <!-- 如果需要分页器 -->
+        <div class="swiper-pagination news-page party-page swiper-pagination-clickable swiper-pagination-bullets"><span class="swiper-pagination-bullet swiper-pagination-bullet-active">1</span><span class="swiper-pagination-bullet">2</span><span class="swiper-pagination-bullet">3</span><span class="swiper-pagination-bullet">4</span></div>
+      </div>
+    </div>
+  </div>
+  <ul><li><a href="/p/news/1679301294401.html" target="_blank"><span class="name">以自我革命精神将全面从严治党向纵深推进以高质量党建引领保障出版社高质量发展 ——人民邮电出版社召开2023年党的建设暨党风廉政建设工作会议</span><span class="date">2023-03-07</span></a></li><li><a href="/p/news/1678877800134.html" target="_blank"><span class="name">我社举办“学习二十大精神，争做新时代雷锋”主题系列活动</span><span class="date">2023-03-07</span></a></li><li><a href="/p/news/1678346958662.html" target="_blank"><span class="name">人民邮电出版社有限公司党委召开2023年第一季度理论学习中心组（扩大）集体学习</span><span class="date">2023-02-21</span></a></li><li><a href="/p/news/1672304755278.html" target="_blank"><span class="name">人民邮电出版社有限公司召开党委理论学习中心组调研学习汇报会</span><span class="date">2022-12-09</span></a></li><li><a href="/p/news/1669173292737.html" target="_blank"><span class="name">人民邮电出版社有限公司党委理论学习中心组（扩大）专题学习党的二十大精神</span><span class="date">2022-11-15</span></a></li><li><a href="/p/news/1668150098208.html" target="_blank"><span class="name">我社举办“学习二十大精神 做新时代好青年”主题团日活动</span><span class="date">2022-11-08</span></a></li></ul>
+</div>
+
+<script>
+  //获取新闻列表
+  $.ajax({
+    url: '/newsInfo/getPartyBuildingForGrid',
+    method: 'get',
+    dataType: 'json',
+    success: function (res) {
+      setPartyTop(res.data.news4)
+      setPartyList(res.data.news6)
+    }
+  })
+
+  //设置上边
+  function setPartyTop(list) {
+    let ids = []
+    $.each(list, function (index, item) {
+      if (item.id) ids.push(item.id)
+    })
+    if (ids.length === 1) {
+      let data = null
+      $.each(list, function (index, item) {
+        if (item.id === ids[0])
+          data = item
+      })
+      $('#party .single').append('<a href="' + data.staticInfoUrl
+        + '" target="_blank"><img src="' + data.picPath
+        + '" alt="' + data.mainTitle + '"><p>' + data.mainTitle
+        + '</p></a>').show()
+      $('#party .many').remove()
+    }
+    if (ids.length > 1) {
+      $('#party .single').remove()
+      $('#party .many').show()
+      $.each(list, function (index, item) {
+        if (item.id) {
+          let str = '<div class="swiper-slide"><a href="' + item.staticInfoUrl
+            + '" target="_blank"><img src="' + item.picPath
+            + '"><p>' + item.mainTitle + '</p></a></div>'
+          $('#party .swiper-wrapper').append(str)
+        }
+      })
+      let trendSwiper = new Swiper('#party-slide', {
+        direction: 'horizontal',
+        loop: true,
+        autoplay: false,
+        simulateTouch: false,
+        speed: 1000,
+        effect: 'slide',
+        pagination: '.party-page',
+        paginationClickable: true,
+        paginationBulletRender: function (swiper, index, className) {
+          return '<span class="' + className + '">' + (index + 1) + '</span>';
+        }
+      });
+    }
+  }
+
+  //设置列表
+  function setPartyList(list) {
+    if (list.length) {
+      $.each(list, function (index, item) {
+        let str = '<li><a href="' + item.staticInfoUrl
+          + '" target="_blank"><span class="name">' + item.mainTitle
+          + '</span><span class="date">' + item.newsDate.split('+')[0]
+          + '</span></a></li>'
+        $('#party ul').append(str)
+      })
+    }
+  }
+</script>
+      </div>
+    </div>
+    <div class="col-5">
+      <div class="col">
+        <!-- 工作动态 -->
+          
+
+<div class="news" id="trend">
+  <div class="title">
+    <i class="trend"></i>
+    <span>工作动态</span>
+    <a href="/newsInfo/list" target="_blank">更多</a>
+  </div>
+  <div class="slide">
+    
+    <div class="many">
+      <div class="swiper-container swiper-container-horizontal" id="trend-slide">
+        <div class="swiper-wrapper" style="transform: translate3d(-550px, 0px, 0px); transition-duration: 0ms;"><div class="swiper-slide swiper-slide-duplicate swiper-slide-prev" data-swiper-slide-index="3" style="width: 550px;"><a href="/p/news/1642744391170.html" target="_blank"><img src="/upload/2022/01/60ee5b3247c24de5b27a346254d4d4c6.jpg"><p>田玉龙出席中国工信出版传媒集团2022年工作会议并讲话</p></a></div><div class="swiper-slide swiper-slide-active" data-swiper-slide-index="0" style="width: 550px;"><a href="/p/news/1665468151558.html" target="_blank"><img src="/upload/2022/10/b81e7a2eff224bf7b68fabfd27cd903d.jpg"><p>我社举行升国旗仪式暨员工荣誉授予仪式庆祝祖国73岁华诞</p></a></div><div class="swiper-slide swiper-slide-next" data-swiper-slide-index="1" style="width: 550px;"><a href="/p/news/1655705101763.html" target="_blank"><img src="/upload/2022/06/dad06bcde8c74c499c66e987b867a6e3.jpg"><p>众志成城 踔厉奋发，营销中心广大员工用实际行动诠释责任担当</p></a></div><div class="swiper-slide" data-swiper-slide-index="2" style="width: 550px;"><a href="/p/news/1649928967488.html" target="_blank"><img src="/upload/2022/04/ecfb92fa15b944e5b1a5248db4216a89.jpg"><p>国家安全微动漫《国家安全，人人有责》</p></a></div><div class="swiper-slide swiper-slide-duplicate-prev" data-swiper-slide-index="3" style="width: 550px;"><a href="/p/news/1642744391170.html" target="_blank"><img src="/upload/2022/01/60ee5b3247c24de5b27a346254d4d4c6.jpg"><p>田玉龙出席中国工信出版传媒集团2022年工作会议并讲话</p></a></div><div class="swiper-slide swiper-slide-duplicate swiper-slide-duplicate-active" data-swiper-slide-index="0" style="width: 550px;"><a href="/p/news/1665468151558.html" target="_blank"><img src="/upload/2022/10/b81e7a2eff224bf7b68fabfd27cd903d.jpg"><p>我社举行升国旗仪式暨员工荣誉授予仪式庆祝祖国73岁华诞</p></a></div></div>
+        <!-- 如果需要分页器 -->
+        <div class="swiper-pagination news-page trend-page swiper-pagination-clickable swiper-pagination-bullets"><span class="swiper-pagination-bullet swiper-pagination-bullet-active">1</span><span class="swiper-pagination-bullet">2</span><span class="swiper-pagination-bullet">3</span><span class="swiper-pagination-bullet">4</span></div>
+      </div>
+    </div>
+  </div>
+  <ul><li><a href="/p/news/1678669931400.html" target="_blank"><span class="name">我社与完美世界、洪恩教育成功签署战略合作协议</span><span class="date">2023-03-07</span></a></li><li><a href="/p/news/1676525112376.html" target="_blank"><span class="name">我社离退休干部工作受到工信部办公厅通报表扬</span><span class="date">2023-02-16</span></a></li><li><a href="/p/news/1677558155433.html" target="_blank"><span class="name">我社与学术志签订战略合作协议</span><span class="date">2023-02-15</span></a></li><li><a href="/p/news/1677557936402.html" target="_blank"><span class="name">我社举办“奋进新时代·扬帆新征程”文明礼仪培训活动</span><span class="date">2023-02-15</span></a></li><li><a href="/p/news/1677200355462.html" target="_blank"><span class="name">我社举办异步社区2023年合作伙伴新春答谢会</span><span class="date">2023-02-10</span></a></li><li><a href="/p/news/1669872577460.html" target="_blank"><span class="name">使命·机遇·挑战：新时代少儿出版前沿论坛暨童趣出版研究院成立两周年大会在京召开</span><span class="date">2022-11-20</span></a></li></ul>
+</div>
+
+<script>
+  //获取新闻列表
+  $.ajax({
+    url: '/newsInfo/getWorkingTrendsForGrid',
+    method: 'get',
+    dataType: 'json',
+    success: function (res) {
+      setTrendTop(res.data.news4)
+      setTrendList(res.data.news6)
+    }
+  })
+
+  //设置上边
+  function setTrendTop(list) {
+    let ids = []
+    $.each(list, function (index, item) {
+      if (item.id) ids.push(item.id)
+    })
+    if (ids.length === 1) {
+      let data = null
+      $.each(list, function (index, item) {
+        if (item.id === ids[0])
+          data = item
+      })
+      $('#trend .single').append('<a href="' + data.staticInfoUrl
+        + '" target="_blank"><img src="' + data.picPath
+        + '" alt="' + data.mainTitle + '"><p>' + data.mainTitle
+        + '</p></a>').show()
+      $('#trend .many').remove()
+    }
+    if (ids.length > 1) {
+      $('#trend .single').remove()
+      $('#trend .many').show()
+      $.each(list, function (index, item) {
+        if (item.id) {
+          let str = '<div class="swiper-slide"><a href="' + item.staticInfoUrl
+            + '" target="_blank"><img src="' + item.picPath
+            + '"><p>' + item.mainTitle + '</p></a></div>'
+          $('#trend-slide .swiper-wrapper').append(str)
+        }
+      })
+      let trendSwiper = new Swiper('#trend-slide', {
+        direction: 'horizontal',
+        loop: true,
+        autoplay: false,
+        simulateTouch: false,
+        speed: 1000,
+        effect: 'slide',
+        pagination: '.trend-page',
+        paginationClickable: true,
+        paginationBulletRender: function (swiper, index, className) {
+          return '<span class="' + className + '">' + (index + 1) + '</span>';
+        }
+      });
+    }
+  }
+
+  //设置列表
+  function setTrendList(list) {
+    if (list.length) {
+      $.each(list, function (index, item) {
+        let str = '<li><a href="' + item.staticInfoUrl
+          + '" target="_blank"><span class="name">' + item.mainTitle
+          + '</span><span class="date">' + item.newsDate.split('+')[0]
+          + '</span></a></li>'
+        $('#trend ul').append(str)
+      })
+    }
+  }
+</script>
+      </div>
+    </div>
+  </div>
+  
+
+
+  <div class="row line">
+    <div class="col-8">
+      <div class="col">
+        <!-- 精品力作 -->
+        
+
+<div id="master" class="master"><div class="title"><i class="master"></i> <span>精品力作</span></div> <div class="list"><div class="item"><div class="box"><a href="/shopping/buy?bookId=140c53af-0fa9-4d80-ba79-a768169c9382" target="_blank"><div class="img"><img src="https://cdn.ptpress.cn/uploadimg/Material/978-7-115-52057-9/72jpg/52057_s300.jpg" alt="科技改变中国丛书（2019年主题出版重点项目）"></div> <p>科技改变中国丛书（2019年主题出版重点项目）</p></a></div></div><div class="item"><div class="box"><a href="/shopping/buy?bookId=f7d8608d-fad6-4b50-8d7e-07e4e2e0ca0d" target="_blank"><div class="img"><img src="https://cdn.ptpress.cn/uploadimg/Material/978-7-115-44355-7/72jpg/44355_s300.jpg" alt="文明之光（中华优秀出版物奖图书奖）"></div> <p>文明之光（中华优秀出版物奖图书奖）</p></a></div></div><div class="item"><div class="box"><a href="/shopping/buy?bookId=99e8d193-00c6-42fc-b8e7-4207f0ebb432" target="_blank"><div class="img"><img src="https://cdn.ptpress.cn/uploadimg/Material/978-7-115-51316-8/72jpg/51316_s300.jpg" alt="奇妙量子世界（2019年度“中国好书”）"></div> <p>奇妙量子世界（2019年度“中国好书”）</p></a></div></div><div class="item"><div class="box"><a href="/shopping/buy?bookId=31f74ba4-9afe-4fac-b95f-cba02744d61f" target="_blank"><div class="img"><img src="https://cdn.ptpress.cn/uploadimg/Material/978-7-115-26039-0/72jpg/26039_s300.jpg" alt="科学家带你去探险丛书（国家科技进步二等奖）"></div> <p>科学家带你去探险丛书（国家科技进步二等奖）</p></a></div></div><div class="item"><div class="box"><a href="/shopping/buy?bookId=0254b28d-5aeb-4cae-905c-8041f03cf6b3" target="_blank"><div class="img"><img src="https://cdn.ptpress.cn/uploadimg/Material/978-7-115-38358-7/72jpg/38358_s300.jpg" alt="空间多维协同传输理论与关键技术（第四届中国出版政府奖图书奖）"></div> <p>空间多维协同传输理论与关键技术（第四届中国出版政府奖图书奖）</p></a></div></div><div class="item"><div class="box"><a href="/shopping/buy?bookId=31a77b57-1e9c-47c2-a5e8-52bd7583145a" target="_blank"><div class="img"><img src="https://cdn.ptpress.cn/uploadimg/Material/978-7-115-57094-9/72jpg/57094_s300.jpg" alt="科学与忠诚：钱学森的人生答卷"></div> <p>科学与忠诚：钱学森的人生答卷</p></a></div></div><div class="item"><div class="box"><a href="/shopping/buy?bookId=e36f78cf-a504-4d26-b7d3-961583204c59" target="_blank"><div class="img"><img src="https://cdn.ptpress.cn/uploadimg/Material/978-7-115-53878-9/72jpg/53878_s300.jpg" alt="计量单位进化史 从度量身体到度量宇宙"></div> <p>计量单位进化史 从度量身体到度量宇宙</p></a></div></div><div class="item"><div class="box"><a href="/shopping/buy?bookId=ec23099b-2d06-43a0-bebf-82e4479e12e8" target="_blank"><div class="img"><img src="https://cdn.ptpress.cn/uploadimg/Material/978-7-115-56607-2/72jpg/56607_s300.jpg" alt="一说万物 现代物理学百年漫谈"></div> <p>一说万物 现代物理学百年漫谈</p></a></div></div></div></div>
+
+<script>
+  let master = new Vue({
+    el: '#master',
+    data: {
+        list: []
+    },
+    mounted: function() {
+      this.getList()
+    },
+    methods: {
+      //获取精品力作列表
+      getList: function() {
+        let $this = this
+        $.ajax({
+          url: '/masterpiece/getMasterpieceListForPortal',
+          method: 'get',
+          dataType: 'json',
+          success: function(res) {
+            $this.list = res.data
+          }
+        })
+      }
+    }
+  })
+</script>
+
+      </div>
+      <div class="col">
+        <!-- 新书推荐 -->
+        
+
+<div id="newBook" class="new-book"><div class="title"><i class="book"></i> <span>新书推荐</span></div> <div class="main"><div class="tabs"><span class="active">计算机</span><span class="">电子</span><span class="">科普</span><span class="">通信</span><span class="">摄影</span><span class="">经济</span><span class="">管理</span><span class="">金融与投资</span><span class="">成功/励志</span><span class="">心理学</span><span class="">设计</span><span class="">音乐</span><span class="">影视传媒</span><span class="">体育</span><span class="">生活</span><span class="">家教育儿</span><span class="">绘画</span><span class="">少儿</span></div> <div class="list"><div class="item"><div class="box"><a href="/shopping/buy?bookId=f26eb4ca-55b1-4f4a-9300-b4b85d29cd72" target="_blank"><div class="img"><img src="https://cdn.ptpress.cn/uploadimg/Material/978-7-115-59350-4/72jpg/59350.jpg" alt="Python编程快速上手2：趣味小项目轻松学"></div> <p>Python编程快速上手2：趣味小项目轻松学</p></a></div></div><div class="item"><div class="box"><a href="/shopping/buy?bookId=055c496a-7db2-4be0-910c-c93d0fdda173" target="_blank"><div class="img"><img src="https://cdn.ptpress.cn/uploadimg/Material/978-7-115-59810-3/72jpg/59810_s300.jpg" alt="人工智能：现代方法（第4版）（上下册）"></div> <p>人工智能：现代方法（第4版）（上下册）</p></a></div></div><div class="item"><div class="box"><a href="/shopping/buy?bookId=6bc6e1d9-6a9f-46cc-a025-64df603e369b" target="_blank"><div class="img"><img src="https://cdn.ptpress.cn/uploadimg/Material/978-7-115-60082-0/72jpg/60082_s300.jpg" alt="动手学深度学习（PyTorch版）"></div> <p>动手学深度学习（PyTorch版）</p></a></div></div><div class="item"><div class="box"><a href="/shopping/buy?bookId=95bfb0d0-ac79-4f5c-8ce2-f96428f227d2" target="_blank"><div class="img"><img src="https://cdn.ptpress.cn/uploadimg/Material/978-7-115-60161-2/72jpg/60161_s300.jpg" alt="人工智能伦理与治理——未来视角"></div> <p>人工智能伦理与治理——未来视角</p></a></div></div><div class="item"><div class="box"><a href="/shopping/buy?bookId=c56cb010-6f0c-4eee-8b93-abe355a18409" target="_blank"><div class="img"><img src="https://cdn.ptpress.cn/uploadimg/Material/978-7-115-60360-9/72jpg/60360_s300.jpg" alt="RISC-V体系结构编程与实践"></div> <p>RISC-V体系结构编程与实践</p></a></div></div><div class="item"><div class="box"><a href="/shopping/buy?bookId=b1bec47c-9f27-42eb-8dd3-fed7acd3a7da" target="_blank"><div class="img"><img src="https://cdn.ptpress.cn/uploadimg/Material/978-7-115-60150-6/72jpg/60150_s300.jpg" alt="程序设计竞赛专题挑战教程"></div> <p>程序设计竞赛专题挑战教程</p></a></div></div><div class="item"><div class="box"><a href="/shopping/buy?bookId=de9d074c-311f-4d9f-8a33-407f2383e8b0" target="_blank"><div class="img"><img src="https://cdn.ptpress.cn/uploadimg/Material/978-7-115-59872-1/72jpg/59872_s300.jpg" alt="图神经网络：基础、前沿与应用"></div> <p>图神经网络：基础、前沿与应用</p></a></div></div><div class="item"><div class="box"><a href="/shopping/buy?bookId=44266acf-7332-4d7f-b3e7-4c119c232912" target="_blank"><div class="img"><img src="https://cdn.ptpress.cn/uploadimg/Material/978-7-115-56569-3/72jpg/56569_s300.jpg" alt="计算机体系结构：量化研究方法（第6版）"></div> <p>计算机体系结构：量化研究方法（第6版）</p></a></div></div></div></div></div>
+<script>
+  let newBook = new Vue({
+    el: '#newBook',
+    data: {
+        tagList: [],
+        active: 0,
+        list: []
+    },
+    mounted: function() {
+      this.getTagList()
+    },
+    methods: {
+      //获取分类
+      getTagList: function() {
+        let $this = this
+        $.ajax({
+          url: '/recommendBook/getRecommendTypeListForPortal',
+          method: 'get',
+          dataType: 'json',
+          success: function(res) {
+            $this.tagList = res.data
+            if (res.data.length) $this.getList(res.data[0].bookTagId, -1)
+          }
+        })
+      },
+      //获取图书列表
+      getList: function(id, index) {
+        let $this = this
+        $this.active = index === -1 ? $this.active : index
+        $.ajax({
+          url: '/recommendBook/getRecommendBookListForPortal',
+          data: {
+            bookTagId: id
+          },
+          success: function(res) {
+            $this.list = res.data
+          }
+        })
+      }
+    }
+  })
+</script>
+
+      </div>
+      <div class="col">
+        <!-- 线上平台 -->
+        
+
+<div id="online" class="online"><div class="title"><i class="online"></i> <span>线上平台</span></div> <div class="list"><div class="item"><a href="https://www.ryjiaoyu.com" target="_blank"><img src="/upload//2020/05/1ab376ffa0bb4ef3acb9cb8597dfa379.jpg"></a></div><div class="item"><a href="https://www.rymooc.com" target="_blank"><img src="/upload//2020/05/a765f05255b84246b047405cf6411033.jpg"></a></div><div class="item"><a href="https://www.ryjiaoshi.com" target="_blank"><img src="/upload//2022/03/63de404663c7401096b4f39f68e1ddbe.jpg"></a></div><div class="item"><a href="https://www.rykaoshi.com/" target="_blank"><img src="/upload//2020/12/fc3042dec1e140339e9cc19ac7a1e58d.jpg"></a></div><div class="item"><a href="https://www.epubit.com" target="_blank"><img src="/upload//2022/08/8fe273d80e404b688abf4bf2fc18dd33.jpg"></a></div><div class="item"><a href="https://www.shuyishe.com" target="_blank"><img src="/upload//2020/05/53918b45df194522b17e399233bfef37.jpg"></a></div><div class="item"><a href="http://www.ryweike.com" target="_blank"><img src="/upload//2020/06/bd02b7b3216e45e3909777f2ba9d05c3.jpg"></a></div><div class="item"><a href="http://www.proedu.com.cn" target="_blank"><img src="/upload//2020/07/0ffe9f54f168411a8db4797dcb934e17.jpg"></a></div><div class="item"><a href="https://www.rysport.cn/" target="_blank"><img src="/upload//2021/12/21180a39caca4098abc1f5b4fcdf9a60.jpg"></a></div><div class="item"><a href="https://www.ushu.com/" target="_blank"><img src="/upload//2021/12/683c44d604e4457c8953793a3f213d61.jpg"></a></div><div class="item"><a href="https://go.ushu.com/" target="_blank"><img src="/upload//2022/03/4f54a6b9905346d0ba37fe8759abf4ed.jpg"></a></div><div class="item"><a href="https://www.huikeart.com.cn/" target="_blank"><img src="/upload//2020/06/4e31586d5e5149d4a781efd388fb18bc.jpg"></a></div></div></div>
+<script>
+  let online = new Vue({
+    el: '#online',
+    data: {
+        list: []
+    },
+    mounted: function() {
+      this.getList()
+    },
+    methods: {
+      //获取线上平台列表
+      getList: function() {
+        let $this = this
+        $.ajax({
+          url: '/onlinePlatform/getOnlinePlatformListForPortal',
+          method: 'get',
+          dataType: 'json',
+          success: function(res) {
+            $this.list = res.data
+          }
+        })
+      }
+    }
+  })
+</script>
+
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="col">
+        <!-- 重要荣誉 -->
+        
+
+<div id="honor" class="honor"><div class="title"><i class="honor"></i> <span>重要荣誉</span></div> <div class="list"><div class="item"><img src="/upload//2020/05/3dfdf207bbfc456da210a9a0408556b9.jpg"> </div><div class="item"><img src="/upload//2020/05/a4dcd0abc4374efeb0bb60d83df73da8.jpg"> </div><div class="item"><img src="/upload//2020/05/fb42e38e004248fda5ba4e3af2abb538.jpg"> </div><div class="item"><img src="/upload//2020/05/7be76b19100245d6918357af64a8f952.jpg"> </div><div class="item"><img src="/upload//2020/05/72062664a6804068adab58aea433afb0.jpg"> </div><div class="item"><img src="/upload//2023/03/7616d1ccace7445fba3a9edf15b26b84.jpg"> </div><div class="item"><img src="/upload//2020/05/1bca9f7ddd0d4bd19974528813a5365a.jpg"> </div><div class="item"><img src="/upload//2023/03/d4c99973483e4bafae0673779b374224.jpg"> </div></div></div>
+<script>
+  let honor = new Vue({
+    el: '#honor',
+    data: {
+        list: []
+    },
+    mounted: function() {
+      this.getList()
+    },
+    methods: {
+      //获取荣誉列表
+      getList: function() {
+        let $this = this
+        $.ajax({
+          url: '/honor/getHonorListForPortal',
+          method: 'get',
+          dataType: 'json',
+          success: function(res) {
+            $this.list = res.data
+          }
+        })
+      }
+    }
+  })
+</script>
+
+      </div>
+      <div class="col">
+        <!-- 服务 -->
+        
+
+<div id="service" class="service"><div class="title"><i class="service"></i> <span>服务</span></div> <div class="list"><div class="item"><a href="/author" target="_blank" title="作者投稿"><img src="/static/interface/img/author.png" alt="作者投稿"></a></div><div class="item"><a href="/download" target="_blank" title="资源下载"><img src="/static/interface/img/download.png" alt="资源下载"></a></div><div class="item"><a href="/newBook" target="_blank" title="新书目录"><img src="/static/interface/img/newbook.png" alt="新书目录"></a></div><div class="item"><a href="http://dealer.ptpress.cn/" target="_blank" title="经销商园地"><img src="/static/interface/img/dealer.png" alt="经销商园地"></a></div><div class="item"><a href="http://ptpress.com.cn:8989/" target="_blank" title="图书馆专区"><img src="/static/interface/img/library.png" alt="图书馆专区"></a></div></div></div>
+<script>
+  let service = new Vue({
+    el: '#service',
+    data: {
+        list: [{
+          name: '作者投稿',
+          picPath: '/static/interface/img/author.png',
+          url: '/author'
+        }, {
+          name: '资源下载',
+          picPath: '/static/interface/img/download.png',
+          url: '/download'
+        }, {
+          name: '新书目录',
+          picPath: '/static/interface/img/newbook.png',
+          url: '/newBook'
+        }, {
+          name: '经销商园地',
+          picPath: '/static/interface/img/dealer.png',
+          url: 'http://dealer.ptpress.cn/'
+        }, {
+          name: '图书馆专区',
+          picPath: '/static/interface/img/library.png',
+          url: 'http://ptpress.com.cn:8989/'
+        }]
+    }
+  })
+</script>
+
+      </div>
+    </div>
+  </div>
+  
+    <div class="row line">
+    <div class="col-10">
+      <div class="col">
+        <!-- 热门专题 -->
+        
+
+<style>
+  .swiper-wrap-special {
+    overflow: hidden;
+    position: relative;
+  }
+  .swiper-slide-special {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .swiper-slide-item-special:hover {
+    color: initial;
+  }
+</style>
+
+<div id="hotSpecialMaster" class="hotSpecialMaster"><div class="title"><i class="hotSpecialMaster"></i> <span>热门专题</span></div> <div class="list"><div class="swiper-wrap swiper-wrap-special"><div class="swiper-container swiper-container-special swiper-container-horizontal"><div class="swiper-wrapper"><div class="swiper-slide swiper-slide-special swiper-slide-active" style="width: 570px; margin-right: 20px;"><a href="/special/detail?id=e3829fb0-dc7d-419f-8613-29823500f16c" class="swiper-slide-item-special" style="display: flex;"><img src="/upload//2022/11/3e31e9fbed894ebc8ffe5f76bf698730.jpg"></a></div><div class="swiper-slide swiper-slide-special swiper-slide-next" style="width: 570px; margin-right: 20px;"><a href="/special/detail?id=5c63f2cd-8524-4049-9ab2-6d14d783f19f" class="swiper-slide-item-special" style="display: flex;"><img src="/upload//2022/11/981a9ebc44e84acbbf90b725ea67a7a6.jpg"></a></div><div class="swiper-slide swiper-slide-special" style="width: 570px; margin-right: 20px;"><a href="/special/detail?id=89d38a18-875d-4a26-bf88-25bf71335321" class="swiper-slide-item-special" style="display: flex;"><img src="/upload//2022/11/6384a418a07849f8bbb085defbd6621d.jpg"></a></div><div class="swiper-slide swiper-slide-special" style="width: 570px; margin-right: 20px;"><a href="/special/detail?id=0f49e81f-23f4-4faf-809f-60e1f2a3b87c" class="swiper-slide-item-special" style="display: flex;"><img src="/upload//2023/02/a7fb36ada63647b69c136b4b674eb874.jpg"></a></div></div></div> <div class="swiper-button-prev swiper-button-prev-special swiper-button-disabled" style="left: 0px;"></div> <div class="swiper-button-next swiper-button-next-special" style="right: 0px;"></div></div></div></div>
+
+<script>
+  let hotSpecialMaster = new Vue({
+    el: '#hotSpecialMaster',
+    data: {
+        list: []
+    },
+    mounted: function() {
+      this.getList()
+    },
+    methods: {
+      //获取精品力作列表
+      getList: function() {
+        let $this = this
+        $.ajax({
+          url: '/special/getIndexSpecial',
+          method: 'get',
+          dataType: 'json',
+          success: function(res) {
+            $this.list = res.data;
+            $this.$nextTick(() => {
+              $this.initSwiper();
+            });
+          }
+        })
+      },
+      initSwiper: function () {
+        this.mySwiper = new Swiper('.swiper-container-special', {
+          slidesPerView : 2,
+          spaceBetween : 20,
+          observer: true,
+          observeParents: true,
+          prevButton: '.swiper-button-prev-special',
+          nextButton: '.swiper-button-next-special',
+        })
+      },
+    }
+  })
+</script>
+
+      </div>
+    </div>
+  </div>
+</div>
+<!-- footer -->
+
+
+<div id="footer" class="container-fluid"><div class="row"><div class="top"><div class="container"><div class="row"><div class="list"><dl><dt>关于我们</dt> <dd><a href="https://www.ptpress.com.cn/about?id=c7cd9bc8-3526-4485-bfc4-75d6014e5643" target="_blank">社长寄语</a></dd><dd><a href="https://www.ptpress.com.cn/about?id=3120fe36-6627-4828-8bcf-9db8b0770abf" target="_blank">企业简介</a></dd><dd><a href="/p/z/1602889687913.html" target="_blank">组织机构</a></dd><dd><a href="https://www.ptpress.com.cn/about?id=185ad723-f0ac-46ca-8f5f-b0dfed02f1d6" target="_blank">部门介绍</a></dd></dl><dl><dt>联系我们</dt> <dd><a href="/p/z/1600078334734.html" target="_blank">读者服务</a></dd><dd><a href="/p/z/1592978151566.html" target="_blank">销售渠道服务</a></dd><dd><a href="/author" target="_blank">投稿咨询</a></dd><dd><a href="http://www.ryjiaoyu.com/article/72" target="_blank">教材服务</a></dd><dd><a href="http://ptpress.com.cn:8989/" target="_blank">图书馆服务</a></dd><dd><a href="http://dealer.ptpress.cn" target="_blank">经销商园地</a></dd></dl><dl><dt>社属公司</dt> <dd><a href="http://www.childrenfun.com.cn/" target="_blank">童趣出版</a></dd><dd><a href="https://m.weibo.cn/p/1005051935391743" target="_blank">普华文化</a></dd><dd><a href="http://www.ituring.com.cn/" target="_blank">图灵文化</a></dd><dd><a href="http://www.zhiyuanbooks.com" target="_blank">智元微库</a></dd></dl><dl><dt>友情链接</dt> <dd><a href="https://www.miit.gov.cn/" target="_blank">工业和信息化部</a></dd><dd><a href="http://www.nppa.gov.cn/?from=timeline&amp;amp;isappinstalled=0" target="_blank">国家新闻出版署</a></dd><dd><a href="https://www.ciitp.com.cn" target="_blank">中国工信出版传媒集团</a></dd><dd><a href="https://www.phei.com.cn" target="_blank">电子工业出版社</a></dd><dd><a href=" http://www.bjxintong.com.cn" target="_blank">信通传媒</a></dd></dl></div> <div class="code"><div class="item"><div class="img"><img src="/static/portal/img/wx.png" alt="官方微信"></div> <h2>关注微信</h2> <p>获取专属服务特权</p></div> <div class="item"><div class="img"><img src="/static/portal/img/wd.png" alt="官方微店"></div> <h2>关注微店</h2> <p>立即领取60元优惠券</p></div></div></div></div></div> <div class="bottom"><p>人民邮电出版社有限公司 <a href="https://beian.miit.gov.cn/" target="_blank">京ICP备05035396号-1 </a> All rights reserved <i>Copyright<span>©</span>1998-2021</i></p> <p>
+        出版物经营许可证：新出发京批字第版0151号
+        <a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=11010602130054" target="_blank"><img src="/static/portal/img/icon.png">京公网安备11010602130054号
+        </a>
+        增值电信业务经营许可证:京B2-20201559
+      </p></div></div></div>
+<script>
+  let footer = new Vue({
+    el: '#footer',
+    data: {
+        list: []
+    },
+    mounted: function() {
+      this.getList()
+    },
+    methods: {
+      /**
+       * 获取底部导航列表
+       **/
+      getList: function() {
+        let $this = this
+        $.ajax({
+          url: '/bottomNav/getBottomNavForGrid',
+          method: 'get',
+          dataType: 'json',
+          success: function(res) {
+            $this.list = res.data
+          }
+        })
+      }
+    }
+  })
+</script>
+
+<!-- right bar -->
+
+
+<div class="right-bar">
+  <div class="item">
+    <a href="javascript:;">
+      <i class="siteFont site-kefu"></i>
+      <p>服务</p>
+    </a>
+    <div class="tools_img">
+      <h3>工 作 日：8:30 - 17:00</h3>
+      <h3>联系电话：010-81055052</h3>
+    </div>
+  </div>
+  <div class="item">
+    <a href="javascript:;">
+      <i class="siteFont site-wechat"></i>
+      <p>关注微信</p>
+    </a>
+    <div class="tools_img">
+      <img src="/static/portal/img/wx.png" alt="官方微信">
+      <div>
+        <p>关注微信</p>
+        <p>获取专属服务特权</p>
+      </div>
+    </div>
+  </div>
+  <div class="item">
+    <a href="https://rmydcbs.tmall.com/" target="_blank">
+      <i class="siteFont site-tmall"></i>
+      <p>天猫旗舰店</p>
+    </a>
+  </div>
+    <div class="item">
+        <a href="https://www.ryjiaoyu.com/" target="_blank">
+            <img style="width: 32px;height: 30px;" src="/static/interface/img/jc.png" alt="教材服务">
+            <p>教材服务</p>
+        </a>
+    </div>
+  <div class="item goBack">
+    <a href="javascript:;">
+      <i class="siteFont site-top"></i>
+      <p>返回顶部</p>
+    </a>
+  </div>
+</div>
+
+<script>
+  if ($(window).width() < 768) {
+    $('.right-bar').hide();
+  }
+  $(window).scroll(function () {
+    let _t = $(window).scrollTop();
+    if (_t < 100) {
+      $('.goBack').hide();
+    } else {
+      $('.goBack').show();
+    }
+  });
+  $(document).on('click', '.goBack', function (e) {
+    $('body,html').animate({
+      scrollTop: 0
+    }, 500);
+  });
+</script>
+
+
+
+</body></html>
