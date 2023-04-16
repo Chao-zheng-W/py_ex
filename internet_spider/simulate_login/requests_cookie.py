@@ -2,7 +2,7 @@
 import requests
 
 #完成登录后刷新网页，可以再network里找到,复制下来.做了脱敏
-cookies ='gr_user_id=###; acw_tc=2760778c16816261833777570e7468ed6e55c46d7a5d3c06fc59614852ccc8; JSESSIONID=5D638DFE7AB233603130C0A5B34B0768'
+cookies ='gr_user_id=###; acw_tc=##; JSESSIONID=5##8'
 
 #直接和get方法发送时，要用字典。
 Cookie = {}
